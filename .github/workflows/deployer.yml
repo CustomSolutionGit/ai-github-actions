@@ -1,0 +1,31 @@
+name: Deployer Agent
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  deploy:
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Tests in Docker
+        run: |
+          docker run --rm \
+            --network none \
+            --memory 512m \
+            -v ${{ github.workspace }}:/app \
+            python:3.11 \
+            pytest
+
+      - name: Deploy to Staging
+        run: |
+          ssh user@staging-server "cd /app && git pull && docker-compose up -d"
+
+      - name: Notify Telegram
+        run: |
+          curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage \
+            -d chat_id=$CHAT_ID \
+            -d text="Task #${{ github.event.pull_request.number }} deployed to staging"

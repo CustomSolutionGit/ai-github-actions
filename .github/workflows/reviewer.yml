@@ -1,0 +1,27 @@
+name: Reviewer Agent
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    if: contains(github.event.pull_request.labels.*.name, 'reviewer')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run static analysis
+        run: |
+          pip install ruff
+          ruff check .
+
+      - name: LLM Review
+        uses: openai-actions/review@v1
+        with:
+          model: gpt-4
+          review-context: ${{ github.event.pull_request.diff }}
+
+      - name: Approve PR if OK
+        run: |
+          gh pr review ${{ github.event.pull_request.number }} --approve
