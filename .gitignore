@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /tg-bot-listener/venv
 /tg-bot-listener/.env
+.env

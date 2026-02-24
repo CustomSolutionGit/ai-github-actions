@@ -22,9 +22,13 @@ async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # 1. Преобразуем голос в текст (Whisper/OpenAI API)
     # text_command = whisper_to_text(tmp_file.name)  # TODO through the whisper API
-    text_command = "Crea a function that calculates the factorial of a number in Python."
+    text_command = "Create a basic angular 20 app with no standalone components, with a single page that has a button. When the button is clicked, it should display an alert with the message 'Hello, World!'"
     # 2. Создаем GitHub Issue
     create_github_issue(text_command)
+
+async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        text_command = update.message.text
+        create_github_issue(text_command)
 
 def create_github_issue(text):
     url = f"https://api.github.com/repos/{REPO}/issues"
@@ -34,4 +38,5 @@ def create_github_issue(text):
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 app.add_handler(MessageHandler(filters.VOICE, voice_handler))
+app.add_handler(MessageHandler(filters.TEXT, text_handler))
 app.run_polling()
